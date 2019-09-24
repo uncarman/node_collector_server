@@ -1,0 +1,24 @@
+{
+  "name": "sunallies-collector-platform",
+  "version": "1.0.0",
+  "description": "## 项目说明 局域网tcp采集",
+  "main": "index.js",
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "kafka-node": "^4.0.1",
+    "mqtt": "^2.18.8",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "prod": "forever start -l `pwd`/logs/prod.txt -a src/index.js prod",
+    "test": "forever start -l `pwd`/logs/test.txt -a src/index.js test",
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://192.168.1.139/sunallies-iot/sunallies-collector-platform.git"
+  },
+  "author": "",
+  "license": "ISC"
+}

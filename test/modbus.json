@@ -1,0 +1,424 @@
+[
+    {
+        "module": "modbus",
+        "dName": "sungrow-1",
+        "address": 39,
+        "customer": {
+            "formatter": "formatter"
+        },
+        "commands": [
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 4989,
+                    "regNum": 92
+                },
+                "points": [
+                    {
+                        "id": "sn",
+                        "offset": 0,
+                        "regNum": 10,
+                        "func": [
+                            ["hex"]
+                        ]
+                    },
+                    {
+                        "id": "dailyEnergy",
+                        "offset": 13,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "totalEnergy",
+                        "offset": 14,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"]
+                        ]
+                    },
+                    {
+                        "id": "runHour",
+                        "offset": 16,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"]
+                        ]
+                    },
+                    {
+                        "id": "temp",
+                        "offset": 18,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "voltage1",
+                        "offset": 21,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "voltage2",
+                        "offset": 23,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "voltage3",
+                        "offset": 25,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "current1",
+                        "offset": 22,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "current2",
+                        "offset": 24,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "current3",
+                        "offset": 26,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "directSidePower",
+                        "offset": 27,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"]
+                        ]
+                    },
+                    {
+                        "id": "activePower",
+                        "offset": 41,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"]
+                        ]
+                    },
+                    {
+                        "id": "reactivePower",
+                        "offset": 43,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"]
+                        ]
+                    },
+                    {
+                        "id": "abVoltage",
+                        "offset": 29,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "abVoltage",
+                        "offset": 30,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "cbVoltage",
+                        "offset": 31,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "aCurrent",
+                        "offset": 32,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "bCurrent",
+                        "offset": 33,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "aCurrent",
+                        "offset": 34,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "factor",
+                        "offset": 45,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 1000, 2]
+                        ]
+                    },
+                    {
+                        "id": "status",
+                        "offset": 91,
+                        "regNum": 2,
+                        "func": [
+                            ["toString", "hex"]
+                        ]
+                    },
+                    {
+                        "id": "warn",
+                        "offset": 55,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    }
+                ]
+            },
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 5112,
+                    "regNum": 30
+                },
+                "points": [
+                    {
+                        "id": "dailyTime",
+                        "offset": 0,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "voltage4",
+                        "offset": 25,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "current4",
+                        "offset": 26,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"],
+                            ["divide", 10, 2]
+                        ]
+                    },
+                    {
+                        "id": "monthEnergy",
+                        "offset": 28,
+                        "regNum": 2,
+                        "func": [
+                            ["swapToBE", "1032"],
+                            ["U32BE"],
+                            ["divide", 10000, 2]
+                        ]
+                    }
+                ]
+            },
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 7012,
+                    "regNum": 18
+                },
+                "points": [
+                    {
+                        "id": "current_1",
+                        "offset": 0,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_2",
+                        "offset": 1,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_3",
+                        "offset": 2,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_4",
+                        "offset": 3,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_5",
+                        "offset": 4,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_6",
+                        "offset": 5,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_7",
+                        "offset": 6,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_8",
+                        "offset": 7,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_9",
+                        "offset": 8,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_10",
+                        "offset": 11,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_11",
+                        "offset": 12,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_12",
+                        "offset": 13,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_13",
+                        "offset": 12,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    },
+                    {
+                        "id": "current_14",
+                        "offset": 13,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

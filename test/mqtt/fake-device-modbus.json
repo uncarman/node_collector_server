@@ -1,0 +1,94 @@
+[
+    {
+        "module": "modbus",
+        "dName": "fake-data",
+        "address": 1,
+        cmdTimeout: 2000,
+        "customer": {
+            "formatter": "formatter"
+        },
+        "commands": [
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 4000,
+                    "regNum": 10
+                },
+                "points": [
+                    {
+                        "id": "d1",
+                        "offset": 0,
+                        "regNum": 1,
+                        "func": [
+                            ["hex"]
+                        ]
+                    }
+                ]
+            },
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 4000,
+                    "regNum": 10
+                },
+                "points": [
+                    {
+                        "id": "d2",
+                        "offset": 1,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "module": "modbus",
+        "dName": "fake-data",
+        "address": 2,
+        "customer": {
+            "formatter": "formatter"
+        },
+        "commands": [
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 4000,
+                    "regNum": 10
+                },
+                "points": [
+                    {
+                        "id": "d3",
+                        "offset": 2,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    }
+                ]
+            },
+            {
+                "options": {
+                    "cmdType": "readInputRegisters",
+                    "startAddress": 4000,
+                    "regNum": 10
+                },
+                "points": [
+                    {
+                        "id": "d4",
+                        "offset": 3,
+                        "regNum": 1,
+                        "func": [
+                            ["swapToBE", "10"],
+                            ["U16BE"]
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

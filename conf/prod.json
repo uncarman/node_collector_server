@@ -1,0 +1,26 @@
+{
+    "interval": 300000,
+    "mysql": {
+        "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
+        "database": "lp_energy",
+        "username": "llproj",
+        "password": "asjfy3j7Y@62o@hksowi"
+    },
+    "redis": {
+        "host": "r-uf66ec88b2433b44pd.redis.rds.aliyuncs.com",
+        "port": 6379,
+        "userpass": "Sunallies123",
+        "db" : 10,
+        "hKeyName": "rank"
+    },
+    "httpServerProd": {
+        "host": "139.196.113.36",
+        "port": 8001,
+        "token": "VqsdkkkmIl06ZjnoSGWxrY9Q"
+    },
+    "httpServerTest": {
+        "host": "139.196.113.36",
+        "port": 8002,
+        "token": "VqsdkkkmIl06ZjnoSGWxrY9Q"
+    }
+}

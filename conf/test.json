@@ -1,0 +1,20 @@
+{
+    "interval": 300000,
+    "mqtt" : {
+        "host": "mqtt://emqtt.sunallies.com",
+        "username": "test",
+        "password": "test",
+        "prefix": "3b65d735"
+    },
+    "redis": {
+        "host": "127.0.0.1",
+        "userpass": "",
+        "db" : 11,
+        "hKeyName": "rank"
+    },
+    "httpServerTest": {
+        "host": "127.0.0.1",
+        "port": 8002,
+        "token": "VqsdkkkmIl06ZjnoSGWxrY9Q"
+    }
+}
