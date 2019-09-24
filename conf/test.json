@@ -1,10 +1,10 @@
 {
     "interval": 300000,
-    "mqtt" : {
-        "host": "mqtt://emqtt.sunallies.com",
-        "username": "test",
-        "password": "test",
-        "prefix": "3b65d735"
+    "mysql": {
+        "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
+        "database": "lp_energy",
+        "username": "llproj",
+        "password": "asjfy3j7Y@62o@hksowi"
     },
     "redis": {
         "host": "127.0.0.1",

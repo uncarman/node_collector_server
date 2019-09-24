@@ -3,7 +3,7 @@
 const util = require('util');
 const EventEmitter = require('events');
 
-var mysql = require('mqtt');
+var mysql = require('mysql');
 
 function DbServer(options) {
     EventEmitter.call(this);
@@ -14,7 +14,7 @@ function DbServer(options) {
     // 创建server实例
     this._createServer();
 }
-util.inherits(MqttServer, EventEmitter);
+util.inherits(DbServer, EventEmitter);
 
 
 // 启动服务
@@ -22,7 +22,7 @@ DbServer.prototype._createServer = function() {
 	this.server = mysql.createConnection({
 		host     :  this.options.host,
 		database :  this.options.database,
-		user     :  this.options.user,
+		user     :  this.options.username,
 		password :  this.options.password,
 	});
 	this.server.connect();
@@ -34,8 +34,31 @@ DbServer.prototype._stopServer = function() {
 }
 
 // 拿到相关数据
-DbServer.prototype.getDatas = function() {
-	
+DbServer.prototype.getCollectors = function() {
+	var sql = "select * from a_collector order by code asc";
+	return new Promise((resolve, reject) => {
+        this.server.query(sql, function (error, results, fields) {
+			if (error) {
+				reject(error);
+			}
+			var res = results && results.length > 0 ? results : [];
+			resolve(JSON.parse(JSON.stringify(res)));
+		});
+    });
+}
+
+// 拿到相关数据
+DbServer.prototype.getItems = function() {
+	var sql = "select * from a_item order by collector_id asc, code asc";
+	return new Promise((resolve, reject) => {
+        this.server.query(sql, function (error, results, fields) {
+			if (error) {
+				reject(error);
+			}
+			var res = results && results.length > 0 ? results : [];
+			resolve(JSON.parse(JSON.stringify(res)));
+		});
+    });
 }
 
 module.exports = DbServer;
