@@ -20,7 +20,7 @@ function DataPaser(deviceId, config) {
     this.buffer = Buffer.alloc(0);
     this.data = {};
 
-    // 采集器SN
+    // 采集器 SN => CollectorCode
     this.deviceId = deviceId;
     // 采集器点表
     this.config = config;
@@ -61,7 +61,7 @@ DataPaser.prototype.init = function() {
         // 拿到命令的超时时间
         this.cmdTimeout = typeof conf.cmdTimeout !== "undefined" ? conf.cmdTimeout : cmdTimeout;
     });
-    // helper.log("[数据采集平台]:准备采集", this.deviceId, "cmds:", JSON.stringify(this.cmds));
+    helper.debug("[数据采集平台]:准备采集", this.deviceId, "cmds:", JSON.stringify(this.cmds));
     this.addrs = Object.keys(this.cmds);
 }
 
@@ -86,8 +86,59 @@ DataPaser.prototype.feed = function(data) {
 };
 
 ///////////////// 基于通信协议 /////////////////
-// 内容buffer, 添加mqtt协议
+
+
+
 DataPaser.prototype.pack = function(buff) {
+    // 直接上抛数据
+    this.emit("send", buff);
+}
+
+DataPaser.prototype.unpack = function() {
+    helper.debug("start unpack msg");
+    var that = this;
+    let isFinished = false;
+    try {
+        this.decodeData(this.buffer);
+        this._slice(this.buffer.length);
+        helper.debug("unpack success, do next");
+        // 解析完成后, 执行下一条命令
+        this.nextCmd();
+    } catch (e) {
+        // 忽略当前设备后续内容，等待一个时间间隔，准备下个设备的采集
+        helper.debug("unpack error:", e.message);
+        helper.debug("unpack error:", dataContent);
+        helper.debug("unpack error:", that.deviceId, that.addrInd, that.cmdInd, that.addrs[that.addrInd]);
+
+        // 等待一次间隔后
+        // 检查是否已经终止采集
+        if (!this.collectingFlag) {
+            this.clearAll();
+        }
+
+        // 检查是否还有设备未采集
+        var nextAddrInd = this.addrInd + 1;
+        if (nextAddrInd >= this.addrs.length) {
+            this.clearAll();
+        }
+
+        // 执行下一个设备采集
+        this.clearAll();
+        this.addrInd = nextAddrInd;
+        this.isWaitingNext = true;
+        // 开始采集下一个设备
+        clearTimeout(this.runCmdTimeOut);
+        this.runCmdTimeOut = null;
+        this.runCmdTimeOut = setTimeout(function () {
+            helper.log("----- in timeout 0");
+            that.nextCmd();
+        }, that.cmdTimeout);
+    }
+}
+
+// 内容buffer, 添加mqtt协议
+DataPaser.prototype.pack_mqtt = function(buff) {
+
     /**
      下行数据
      * rank        协议
@@ -134,7 +185,7 @@ DataPaser.prototype.pack = function(buff) {
 }
 
 // 从mqtt获取原始数据, 进行解包
-DataPaser.prototype.unpack = function() {
+DataPaser.prototype.unpack_mqtt = function() {
     var that = this;
     while (this.buffer.length > 0) {
         let isFinished = false;
@@ -214,7 +265,7 @@ DataPaser.prototype.encodeData = function(data) {
 // 采集返回的buffer内容 -> json内容
 DataPaser.prototype.decodeData = function(buffer) {
     var that = this;
-    // helper.log("----", buffer);
+    helper.debug("decodeData", buffer);
     // 拿到当前地址对应的命令
     let res = this.devicePasers[this.addrs[this.addrInd]].parsePoint(buffer, this.cmdInd);
     // 将res的结果合并到缓存集中
@@ -231,6 +282,9 @@ DataPaser.prototype.clearAll = function() {
         "addr": this.addrs[this.addrInd]
     }
     this.buffer = Buffer.alloc(0);
+
+    clearTimeout(this.runCmdTimeOut);
+    this.runCmdTimeOut = null;
 }
 
 // 执行下一条cmd
@@ -253,17 +307,20 @@ DataPaser.prototype.nextCmd = function() {
     this.cmdInd += 1;
     // 当前地址的采集已经结束
     // 发送缓存的数据
+    helper.debug(this.cmdInd, this.addrInd);
+    helper.debug(this.cmds[this.addrs[this.addrInd]].length, this.addrs.length);
+    helper.debug(this.cmdInd, this.addrInd, this.cmds[this.addrs[this.addrInd]].length, this.addrs.length);
     if(this.cmdInd >= this.cmds[this.addrs[this.addrInd]].length) {
+        helper.debug("地址", this.addrs[this.addrInd], "采集结束，", JSON.stringify(that.data));
         // 当前地址采集完成，补充当前信号强度，发送数据
-        that.data._s = this.signal;
-        that.emit("data", formatData(that.data, this.devicePasers[this.addrs[this.addrInd]]["config"]));
-
+        that.emit("data", that.data);
+        //that.emit("data", formatData(that.data, this.devicePasers[this.addrs[this.addrInd]]["config"]));
         // 启动下一个地址的采集
         this.addrInd += 1;
+        helper.debug("开始采集下一个地址", this.addrInd, this.addrs[this.addrInd]);
         // 采集器已全部采集结束, 重置各个flag
         if(this.addrInd >= this.addrs.length) {
-            // 补充当前信号强度
-            that.data._s = that.signal;
+            helper.debug("所有地址采集结束。");
             // 发送当前地址的所有数据
             that.emit("fdata", {});
             this.clearAll();
@@ -275,20 +332,18 @@ DataPaser.prototype.nextCmd = function() {
             };
 
             // 启动超时监听
+            that.nextCmd();
             this.runCmdTimeOut = setTimeout(function(){
+                helper.log("----- in timeout 1");
                 that.nextCmd();
             }, that.cmdTimeout);
         }
     } else {
-        //helper.log(this.cmds[this.addrs[this.addrInd]][this.cmdInd]);
+        helper.log("继续当前地址，发送下一个命令", this.cmds[this.addrs[this.addrInd]][this.cmdInd]);
         // 通过上层mqtt发送命令
         let cmd = this.cmds[this.addrs[this.addrInd]][this.cmdInd];
+        helper.debug("send cmd:", cmd);
         this.pack(cmd);
-
-        // 启动超时监听
-        this.runCmdTimeOut = setTimeout(function(){
-            that.nextCmd();
-        }, that.cmdTimeout);
     }
 };
 

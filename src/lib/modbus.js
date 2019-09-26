@@ -50,16 +50,17 @@ Modbus.prototype._parseResponseBuffer = function (buffer, ind) {
     if (buffer.length < 2) {
         return null;
     }
-    let crcValue = buffer.readUInt16LE(buffer.length - 2);
-    let bufferDecoded = buffer.slice(0, buffer.length - 2);
-    let dataContent = bufferDecoded;
-    helper.debug("_parseResponseBuffer dataContent,crc16(dataContent),crcValue ", dataContent, crc16(dataContent), crcValue);
-    if (crc16(dataContent) != crcValue) {
-        // 数据不匹配，可能包含发送命令，去掉第一个字节，尝试重新截取
-        return this._parseResponseBuffer(buffer.slice(1), ind);
-    }
+    // let crcValue = buffer.readUInt16LE(buffer.length - 2);
+    // let bufferDecoded = buffer.slice(0, buffer.length - 2);
+    // let dataContent = bufferDecoded;
+    // helper.debug("_parseResponseBuffer dataContent,crc16(dataContent),crcValue ", dataContent, crc16(dataContent), crcValue);
+    // if (crc16(dataContent) != crcValue) {
+    //     // 数据不匹配，可能包含发送命令，去掉第一个字节，尝试重新截取
+    //     return this._parseResponseBuffer(buffer.slice(1), ind);
+    // }
 
     try {
+        let dataContent = buffer;
         // 解析数据内容
         let addr = parseInt(dataContent.slice(0, 1).toString('hex'), 16);  // 采集地址
         let funcCode = parseInt(dataContent.slice(1, 2).toString('hex'), 16);  // 功能码

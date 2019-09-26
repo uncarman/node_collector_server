@@ -7,5 +7,7 @@ const config = env === 'prod' ? require('../conf/prod.json') : require('../conf/
 const AppServer = require('./appServer.js');
 const app = new AppServer(config);
 
+process.env.TZ = 'Asia/Shanghai';
+
 // 开始采集
 app.start(env);

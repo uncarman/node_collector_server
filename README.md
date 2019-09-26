@@ -1,7 +1,7 @@
-# 适配通用采集装置的云端解析中间件
+# 透传采集服务端程序
 
 ## 项目说明
-为适应Rank-mqtt数据采集器或其他通用采集器建立的云端解析中间件
+适配透传采集器
 
 ## 环境配置
 
@@ -19,13 +19,6 @@ npm -v
 
 <br/>
 
-#### 2. 下载项目
-从`gitlab`下载项目到工程目录并进入该工程目录，例如：
-```
-git clone http://192.168.1.139/sunallies-iot/sunallies-collector-platform.git
-
-cd sunallies-collector-platform
-```
 
 <br/>
 
@@ -46,3 +39,17 @@ npm install
 >```
 
 <br/>
+
+
+
+#### 4. 可能问题
+如果通过npm镜像安装依赖失败，可尝试用国内镜像
+```
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+```
+<br/>
+
+如果遇到 未能加载 Visual C++ 组件“VCBuild.exe”， 需要安装构建工具
+```
+npm install --global --production windows-build-tools
+```

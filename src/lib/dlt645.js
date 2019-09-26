@@ -101,7 +101,7 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
         let remain = dataBuffer.slice(0, len - 2);
         let calculateChecksum = BytesChecksum(remain);
 
-        //helper.log("#", len, checksum, remain, calculateChecksum);
+        helper.log("#", len, checksum, remain, calculateChecksum);
 
         // 校验正确性
         if (checksum == calculateChecksum[0]) {

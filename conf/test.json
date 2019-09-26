@@ -1,20 +1,14 @@
 {
-    "interval": 300000,
+    "colServ": {
+        "interval": 300000,
+        "host": "0.0.0.0",
+        "port": "7000",
+        "heartBeat": 30000
+    },
     "mysql": {
         "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
         "database": "lp_energy",
         "username": "llproj",
         "password": "asjfy3j7Y@62o@hksowi"
-    },
-    "redis": {
-        "host": "127.0.0.1",
-        "userpass": "",
-        "db" : 11,
-        "hKeyName": "rank"
-    },
-    "httpServerTest": {
-        "host": "127.0.0.1",
-        "port": 8002,
-        "token": "VqsdkkkmIl06ZjnoSGWxrY9Q"
     }
 }

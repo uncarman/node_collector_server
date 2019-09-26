@@ -2,8 +2,9 @@
 
 const util = require('util');
 const EventEmitter = require('events');
+const mysql = require('mysql');
 
-var mysql = require('mysql');
+const helper = require('./helper.js');
 
 function DbServer(options) {
     EventEmitter.call(this);
@@ -35,7 +36,7 @@ DbServer.prototype._stopServer = function() {
 
 // 拿到相关数据
 DbServer.prototype.getCollectors = function() {
-	var sql = "select * from a_collector order by code asc";
+	var sql = "select * from a_collector where send_type = 0 order by code asc";
 	return new Promise((resolve, reject) => {
         this.server.query(sql, function (error, results, fields) {
 			if (error) {
@@ -59,6 +60,35 @@ DbServer.prototype.getItems = function() {
 			resolve(JSON.parse(JSON.stringify(res)));
 		});
     });
-}
+};
+
+// 拿到相关数据
+DbServer.prototype.updateData = function(msg) {
+	var that = this;
+	var sql = "select * from a_item_data where item_id = ?";
+	var val = msg.id;
+	this.server.query(sql, val, function (err, res, fields) {
+		if (err) {
+			helper.log(err.message);
+		}
+		var curItem = null;
+		if(res && res.length > 0) {
+			curItem = res[0];
+		}
+		if(curItem) {
+			sql = "update a_item_data set indication = ?, other_data = ?, updated_at = ? where id= ?";
+			val = [msg.ind, JSON.stringify(msg), new Date(), curItem.id];
+		} else {
+			sql = "insert into a_item_data (item_id, indication, other_data, updated_at) values (?,?,?,?)";
+			val = [msg.id, msg.ind, JSON.stringify(msg), new Date()];
+		}
+		that.server.query(sql, val, function (err, res, fields) {
+			if (err) {
+				helper.log(err.message);
+			}
+			helper.log(res);
+		});
+	});
+};
 
 module.exports = DbServer;

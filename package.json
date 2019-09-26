@@ -1,24 +1,20 @@
 {
-  "name": "sunallies-collector-platform",
+  "name": "node_collector_server",
   "version": "1.0.0",
-  "description": "## 项目说明 局域网tcp采集",
+  "description": "透传网关服务端",
   "main": "index.js",
   "dependencies": {
-    "amqplib": "^0.5.3",
-    "kafka-node": "^4.0.1",
-    "mqtt": "^2.18.8",
-    "redis": "^2.8.0"
+      "mysql": "^2.17.1"
   },
   "devDependencies": {},
   "scripts": {
-    "prod": "forever start -l `pwd`/logs/prod.txt -a src/index.js prod",
-    "test": "forever start -l `pwd`/logs/test.txt -a src/index.js test",
-    "start": "node src/index.js"
+      "prod": "forever start -l `pwd`/logs/prod.txt -a src/index.js prod",
+      "test": "forever start -l `pwd`/logs/test.txt -a src/index.js test",
+      "start": "node src/index.js"
   },
   "repository": {
-    "type": "git",
-    "url": "http://192.168.1.139/sunallies-iot/sunallies-collector-platform.git"
+      "type": "git",
+      "url": "https://github.com/uncarman/node_collector_server.git"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "sam"
 }

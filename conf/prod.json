@@ -1,5 +1,11 @@
 {
     "interval": 300000,
+    "mqtt": {
+        "host": "mqtt://139.196.113.36",
+        "username": "admin",
+        "password": "public",
+        "prefix": "3b65d735"
+    },
     "mysql": {
         "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
         "database": "lp_energy",
