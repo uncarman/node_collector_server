@@ -40,6 +40,8 @@ TcpServer.prototype._init_ = function() {
                 if (that.sockets.hasOwnProperty(connection)) {
                     helper.log('#', connection, 'disconnect, update map');
                     socket.dataParser.clearAll();
+                    clearInterval(socket.running);
+                    socket.running = null;
                     delete that.sockets[connection];
                 }
             });
@@ -162,7 +164,7 @@ TcpServer.prototype.dealRes = function(socketId, buff) {
         socket.dataParser.startCollector();
 
         // 启动轮训
-        setInterval(function () {
+        socket.running = setInterval(function () {
             // 清除垃圾数据
             socket.dataParser.clearAll();
             // 使用dataParser发送采集命令
