@@ -334,12 +334,11 @@ DataPaser.prototype.nextCmd = function() {
             // 启动超时监听
             that.nextCmd();
             this.runCmdTimeOut = setTimeout(function(){
-                helper.log("----- in timeout 1");
                 that.nextCmd();
             }, that.cmdTimeout);
         }
     } else {
-        helper.log("继续当前地址，发送下一个命令", this.cmds[this.addrs[this.addrInd]][this.cmdInd]);
+        helper.debug("继续当前地址，发送下一个命令", this.cmds[this.addrs[this.addrInd]][this.cmdInd]);
         // 通过上层mqtt发送命令
         let cmd = this.cmds[this.addrs[this.addrInd]][this.cmdInd];
         helper.debug("send cmd:", cmd);
@@ -362,7 +361,7 @@ DataPaser.prototype.startCollector = function() {
     this.buffer = Buffer.alloc(0);
     // 执行第一条命令
     this.nextCmd();
-}
+};
 
 // 停止采集
 DataPaser.prototype.stopCollector = function() {

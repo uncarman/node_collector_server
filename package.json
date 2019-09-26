@@ -8,8 +8,7 @@
   },
   "devDependencies": {},
   "scripts": {
-      "prod": "forever start -l `pwd`/logs/prod.txt -a src/index.js prod",
-      "test": "forever start -l `pwd`/logs/test.txt -a src/index.js test",
+      "test": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a src/index.js test",
       "start": "node src/index.js"
   },
   "repository": {

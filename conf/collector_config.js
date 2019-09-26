@@ -95,7 +95,7 @@ function collectorConfig() {
                         "code": "00020000"
                     },
                     "points":[
-                        {"id": "ra", "dotPosition": 2 }
+                        {"id": "ind", "dotPosition": 2 }
                     ]
                 },
             ]

@@ -39,16 +39,17 @@ TcpServer.prototype._init_ = function() {
                 // clear connectionMap info
                 if (that.sockets.hasOwnProperty(connection)) {
                     helper.log('#', connection, 'disconnect, update map');
+                    socket.dataParser.clearAll();
                     delete that.sockets[connection];
                 }
             });
 
             socket.on('end', function() {
-                console.log('# on end');
+                helper.log('# on end');
             });
 
             socket.on('error', function(error) {
-                console.log('# on error:', error);
+                helper.log('# on error:', error.message);
             });
 
             // 获取采集器id
@@ -59,7 +60,7 @@ TcpServer.prototype._init_ = function() {
 
         var host = that.options.host;
         var port = that.options.port;
-        console.log('listening ' + host + ' port ' + port);
+        helper.log('listening ' + host + ' port ' + port);
         this.server.listen(port, host);
         return true;
     }
@@ -147,17 +148,26 @@ TcpServer.prototype.dealRes = function(socketId, buff) {
         // 当拿到采集器下单个的设备采集结束
         socket.dataParser.on("fdata", function(msg) {
             // 采集完成, 移除正在运行的设备编号
-            helper.log("设备", socket.sn, " 采集完成。");
+            helper.debug("设备", socket.sn, " 采集完成。");
         });
         // 拿到需要发送的命令执行消息推送
         socket.dataParser.on("send", function(cmd) {
             socket.write(cmd);
         });
 
+
         // 清除垃圾数据
         socket.dataParser.clearAll();
         // 使用dataParser发送采集命令
         socket.dataParser.startCollector();
+
+        // 启动轮训
+        setInterval(function () {
+            // 清除垃圾数据
+            socket.dataParser.clearAll();
+            // 使用dataParser发送采集命令
+            socket.dataParser.startCollector();
+        }, col.upload_cycle * 60 * 1000);
 
         socket.inited = true;
     }

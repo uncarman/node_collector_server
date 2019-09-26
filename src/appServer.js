@@ -28,8 +28,12 @@ AppServer.prototype.start = function(env) {
         // 创建 tcp server
         that.colServ = new TcpServ(this.options.colServ);
         that.colServ.on("data", function(msg) {
-            helper.log(msg);
-            //that.db.updateData(msg);
+            if(msg.hasOwnProperty("ind")) {
+                helper.log("[to server]", msg);
+                //that.db.updateData(msg);
+            } else {
+                helper.log("[delete msg]", msg);
+            }
         });
 
         // 更新数据

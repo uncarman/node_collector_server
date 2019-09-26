@@ -101,7 +101,7 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
         let remain = dataBuffer.slice(0, len - 2);
         let calculateChecksum = BytesChecksum(remain);
 
-        helper.log("#", len, checksum, remain, calculateChecksum);
+        helper.debug("#", len, checksum, remain, calculateChecksum);
 
         // 校验正确性
         if (checksum == calculateChecksum[0]) {
@@ -110,7 +110,7 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
             var payloadBuffer = dataBuffer.slice(14, 18);   
             // 返回错误, 电表命令不支持
             if (tag == FunctionCode.error) {
-                helper.log("#" + command.options.name + " code: " + command.options.code + " not support");
+                helper.debug("#" + command.options.name + " code: " + command.options.code + " not support");
                 parsedObj[pointConf.id] = "0.00";
             }
             else {
