@@ -1,19 +1,19 @@
 {
-  "name": "node_collector_server",
-  "version": "1.0.0",
-  "description": "透传网关服务端",
-  "main": "index.js",
-  "dependencies": {
-      "mysql": "^2.17.1"
-  },
-  "devDependencies": {},
-  "scripts": {
-      "test": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a src/index.js test",
-      "start": "node src/index.js"
-  },
-  "repository": {
-      "type": "git",
-      "url": "https://github.com/uncarman/node_collector_server.git"
-  },
-  "author": "sam"
+    "name": "node_collector_server",
+    "version": "1.0.0",
+    "description": "透传网关服务端",
+    "main": "index.js",
+    "dependencies": {
+        "mysql": "^2.17.1"
+    },
+    "scripts": {
+        "test": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a src/index.js test",
+        "mds": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a test/httpServ.js",
+        "start": "node src/index.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/uncarman/node_collector_server.git"
+    },
+    "author": "sam"
 }
