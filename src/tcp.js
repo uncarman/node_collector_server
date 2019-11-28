@@ -11,6 +11,7 @@ const CollectorConf = require("../conf/collector_config.js").collectorConfig();
 
 function TcpServer(options) {
     this.options = options;
+    this.collectorId = 1;
     this.sockets = {};
     this.server = null;
     this.started = false;
@@ -27,12 +28,14 @@ TcpServer.prototype._init_ = function() {
             var connection = socket.remoteAddress + ':' + socket.remotePort;
             that.sockets[connection] = socket;
             socket.inited = false;
+            socket.connection = connection;
+            socket.sn = that.collectorId; // 只有一个采集器
             socket.dataParsers = {};
 
             socket.setKeepAlive(true, 300000);
 
             socket.on('data', function(data) {
-                that.dealRes(connection, data);
+                that.dealRes(socket, data);
             });
 
             socket.on('close', function() {
@@ -54,10 +57,7 @@ TcpServer.prototype._init_ = function() {
                 helper.log('# on error:', error.message);
             });
 
-            // 获取采集器id
-            socket.write(JSON.stringify({
-                "method": "getId",
-            }));
+            this.startCollect(socket);
         });
 
         var host = that.options.host;
@@ -73,106 +73,74 @@ TcpServer.prototype.setMaps = function(maps) {
     this._maps = maps;
 }
 
-TcpServer.prototype.dealRes = function(socketId, buff) {
-    helper.debug(socketId, buff.toString("hex"));
+TcpServer.prototype.startCollect = function(socket) {
+    this.dealRes(socket);
+}
+
+TcpServer.prototype.dealRes = function(socket, buff) {
     var that = this;
-    var socket = this.sockets[socketId];
-    var data = {};
-    try {
-        data = JSON.parse(buff.toString("utf8"));
-    } catch (e) {
-        // buffer 数据
-        try {
-            if(socket.dataParser) {
-                socket.dataParser.feed(buff);
-            }
-        } catch (e) {
-            // pass
-        }
+
+    // 已经正常启动， 有 buffer 数据
+    if(socket.dataParser && buff) {
+        socket.dataParser.feed(buff);
     }
 
-    // 获取sn返回
-    if(data.hasOwnProperty("sn")) {
-        socket.sn = data.sn;
+    // 如果第一次启动
+    // 拿到对应的设备列表器
+    var items = this._maps.items.filter(function (it) {
+        return it.collector_id == that.collectorId;
+    });
+    // 根据 items 生成 confs
+    var confs = [];
+    items.map(function (it) {
+        var c = JSON.parse(JSON.stringify(conf));
+        c.address = it.code;
+        confs.push(c);
+    });
+    // 生成item地址映射
+    var itemMap = {};
+    items.map(it=>{
+        itemMap[it.code] = it;
+    });
 
-        // 采集准备
-        // 拿到对应的采集器
-        var col = this._maps.collectors.filter(function (co) {
-            return co.code == socket.sn;
-        });
-        if(col.length > 0) {
-            col = col[0];
-        } else {
-            helper.log(socket.sn, "未读取相应的采集器");
-            return null;
+    // 初始化一个dataParser
+    socket.dataParser = new DataParser(socket.sn, confs);
+    // 当拿到采集器下某个的设备完整json信息时, 上抛出信息
+    socket.dataParser.on("data", function(msg) {
+        helper.debug(msg);
+        // 补充采集器sn号
+        if(msg && JSON.stringify(msg) !== "{}") {
+            msg.uid = socket.sn;
+            msg.id = itemMap[msg.addr].id;
+            //delete msg.addr;
+            that.emit("data", msg);
         }
-
-        // 拿到对应的点表
-        var conf = CollectorConf.filter(function (mc) {
-            return mc.code == socket.sn;
-        });
-        if(conf.length > 0) {
-            conf = conf[0];
-        } else {
-            helper.log(socket.sn, "未配置相应的采集命令");
-            return null;
-        }
-
-        var items = this._maps.items.filter(function (it) {
-            return it.collector_id == col.id;
-        });
-        // 根据 items 生成 confs
-        var confs = [];
-        items.map(function (it) {
-            var c = JSON.parse(JSON.stringify(conf));
-            c.address = it.code;
-            confs.push(c);
-        });
-        // 生成item地址映射
-        var itemMap = {};
-        items.map(it=>{
-            itemMap[it.code] = it;
-        });
-
-        // 初始化一个dataParser
-        socket.dataParser = new DataParser(socket.sn, confs);
-        // 当拿到采集器下某个的设备完整json信息时, 上抛出信息
-        socket.dataParser.on("data", function(msg) {
-            helper.debug(msg);
-            // 补充采集器sn号
-            if(msg && JSON.stringify(msg) !== "{}") {
-                msg.uid = socket.sn;
-                msg.id = itemMap[msg.addr].id;
-                //delete msg.addr;
-                that.emit("data", msg);
-            }
-        });
-        // 当拿到采集器下单个的设备采集结束
-        socket.dataParser.on("fdata", function(msg) {
-            // 采集完成, 移除正在运行的设备编号
-            helper.debug("设备", socket.sn, " 采集完成。");
-        });
-        // 拿到需要发送的命令执行消息推送
-        socket.dataParser.on("send", function(cmd) {
-            socket.write(cmd);
-        });
+    });
+    // 当拿到采集器下单个的设备采集结束
+    socket.dataParser.on("fdata", function(msg) {
+        // 采集完成, 移除正在运行的设备编号
+        helper.debug("设备", socket.sn, " 采集完成。");
+    });
+    // 拿到需要发送的命令执行消息推送
+    socket.dataParser.on("send", function(cmd) {
+        socket.write(cmd);
+    });
 
 
+    // 清除垃圾数据
+    socket.dataParser.clearAll();
+    // 使用dataParser发送采集命令
+    socket.dataParser.startCollector();
+
+    // 启动轮训
+    socket.running = setInterval(function () {
         // 清除垃圾数据
         socket.dataParser.clearAll();
         // 使用dataParser发送采集命令
         socket.dataParser.startCollector();
+    }, col.upload_cycle * 60 * 1000);
 
-        // 启动轮训
-        socket.running = setInterval(function () {
-            // 清除垃圾数据
-            socket.dataParser.clearAll();
-            // 使用dataParser发送采集命令
-            socket.dataParser.startCollector();
-        }, col.upload_cycle * 60 * 1000);
-
-        socket.inited = true;
-    }
+    socket.inited = true;
 };
 
 module.exports = TcpServer;
