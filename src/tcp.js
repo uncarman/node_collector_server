@@ -57,7 +57,7 @@ TcpServer.prototype._init_ = function() {
                 helper.log('# on error:', error.message);
             });
 
-            this.startCollect(socket);
+            that.startCollect(socket);
         });
 
         var host = that.options.host;
