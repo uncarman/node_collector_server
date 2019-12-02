@@ -1,6 +1,10 @@
 let http = require('http');
 let url = require('url');
 let querystring = require('querystring');
+const Db = require("./db.js");
+
+const env = process.argv[2] === "prod" ? "prod" : "test";
+const config = env === 'prod' ? require('../conf/prod.json') : require('../conf/test.json');
 
 var port = 8080;
 var queue = [];
@@ -43,6 +47,16 @@ let cmdMap = {
     "POSTLEAKAGE": "13. 上传漏电流统计数据",  // 设备的每小时或每天平均漏电流数据
 };
 
+let db = new Db(config.mysql);
+let items = {};
+
+Promise.all([db.getItems()]).then(data => {
+    data[0].map((d) => {
+        items[d.code] = d;
+    });
+    console.log(items);
+});
+
 
 http.createServer((req, res)=>{
     return dealRequest(req, res);
@@ -65,6 +79,23 @@ function isJSON(str) {
             console.log('error：'+str+'!!!'+e);
             return false;
         }
+    }
+}
+
+function fmtData(data) {
+    if(data.substr(-3) == "%0A") {
+        let res = data.split("%0A").map( (s) => {
+            try {
+                s = unescape(s.trim())
+                s = Buffer.from(s, 'base64').toString('utf8')
+            } catch (e) {
+                console.log(e.message);
+            }
+            return s
+        });
+        return res.join("");
+    } else {
+        return Buffer.from(data, 'base64').toString('utf8');
     }
 }
 
@@ -94,15 +125,29 @@ function dealRequest(req, res) {
             if(pathname === '/data/carry'){
                 try {
                     let data = querystring.parse(str);
-
                     if(data["mac"] && data["mac"] != "") {
                         if(queue.length >= queueMaxLen) {
                             queue.pop();
                         }
 
                         if(data.content != "") {
-                            let content = Buffer.from(data.content, 'base64').toString('ascii');
+                            let content = fmtData(data.content); //Buffer.from(, 'base64').toString('ascii');
                             content = JSON.parse(content);
+                            
+                            // 更新数据到db
+                            if(data.cmd == "POSTRT") {
+                                let itemCode = data.distributbox.serverinfo;
+                                data.Breakers.map((d) => {
+                                    try {
+                                        d.id = items[itemCode+"-"+d.addr].id;
+                                        d.ind = d.power;
+                                        db.updateData(d);
+                                    } catch (e) {
+                                        // pass
+                                        console.log("item id not find: ", JSON.stringify(d));
+                                    }
+                                });
+                            }
                             content._cmd = data.cmd;
                             content._cmdName = cmdMap[data.cmd] || "未知";
                             queue = [content].concat(queue);
