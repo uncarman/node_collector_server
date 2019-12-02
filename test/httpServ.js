@@ -1,10 +1,49 @@
 let http = require('http');
 let url = require('url');
+let querystring = require('querystring');
 
-var port = 8085;
+var port = 8080;
 var queue = [];
-var queueMaxLen = 100;
+var queueMaxLen = 80;
 
+let cmdMap = {
+    // 命令控制
+    "GETCMD": "2. 获取命令",
+    "HASCLIENT": "① 是否有用户登录这个设备（通过服务器）",
+    "SETRATE": "② 设置实时数据 POSTRT 上传频率",
+    "OCSWITCH": "③ 线路开关操作命令",
+    "SWITCHLEAK": "④ 漏电检测",
+    "SETAUTOLEAK": "⑤ 自动漏电自检设置",
+    "SETWIRELESS": "⑥ 网络设置",
+    "SETLOGINPWD": "⑦ 修改设备密码",
+    "SWITCHSET": "⑧ 线路的功率限定和名称修改",
+    "UPDATEALARM": "⑨ 修改告警信息",
+    "UPDATEDEVICES": "⑩ 添加或修改电器",
+    "UPDATETIMER": "⑪添加或修改定时",
+    "DELDEVICES": "⑫删除电器",
+    "DELTIMER": "⑬删除定时命令数据",
+    "DELALARMES": "⑭删除信息命令数据",
+    "SETCONTROL": "⑮设置线路是否能遥控",
+    "SETVISIBILITY": "⑯设置线路是否显示",
+    "DELDEVICESES": "⑰同时删除多个电器",
+    "DELTIMERES": "⑱同时删除多个定时",
+    "SETWIRING": "⑲设置线路的接线模式",
+    "SETTIMEZONE": "⑳ 设置时区",
+    "UPGRADING": "21 远程升级",
+    // 实施数据
+    "POSTRT": "3. 上传实时数据",
+    "POSTALARM": "4. 上传告警",
+    "POSTDEVICE": "5. 上传电器数据",
+    "POSTTIMER": "6. 上传定时数据",
+    "POSTPOWER": "7. 上传电量数据",  // 重要
+    "POSTVOLTAGE": "8. 上传平均电压数据", // 每小时或每天平均电压数 据
+    "POSTCURRENT": "9. 上传电流数据",  // 每小时或每天平均电流数 据
+    "POSTMSGPUSH": "10. 推送最新消息",
+    "POSTTEMPERATURE": "11. 上传温度统计数据",  // 提交设备的每小时或每天的最高温度数据
+    "POSTLEAKAGE": "13. 上传漏电流统计数据",  // 设备的每小时或每天平均漏电流数据
+};
+
+var whiteList = ["POSTRT", "POSTALARM", "POSTPOWER"];
 
 
 http.createServer((req, res)=>{
@@ -52,20 +91,35 @@ function dealRequest(req, res) {
             } else {
                 res.write("服务器正常启动");
             }
+            res.end();
         } else if(req.method == "POST") {
-            console.log(str);
             if(pathname === '/data/carry'){
-                if(isJSON(str)) {
-                    var d = JSON.parse(str);
-                    if(queue.length >= queueMaxLen) {
-                        queue.pop();
+                try {
+                    let data = querystring.parse(str);
+
+                    if(data["mac"] && data["mac"] != "") {
+                        if(queue.length >= queueMaxLen) {
+                            queue.pop();
+                        }
+
+                        if(data.content != "") {
+                            let content = Buffer.from(data.content, 'base64').toString('ascii');
+                            content = JSON.parse(content);
+                            content._cmd = data.cmd;
+                            if(whiteList.indexOf(content._cmd) >= 0) {
+                                content._cmdName = cmdMap[data.cmd] || "未知";
+                                queue = [content].concat(queue);
+                            }
+                        }
                     }
-                    queue = [d].concat(queue);
+                } catch(e) {
+                    console.log(e.message, str);
                 }
                 res.write(JSON.stringify(ret));
             } else {
                 res.write('请求错误: 目前只支持 /data/carry');
             }
+            res.end();
         }
         res.end();
     });

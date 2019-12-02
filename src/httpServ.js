@@ -1,7 +1,11 @@
+
+// 针对曼顿开发获取实时数据服务
+
 let http = require('http');
 let url = require('url');
 let querystring = require('querystring');
 const Db = require("./db.js");
+const helper = require("./helper.js");
 
 const env = process.argv[2] === "prod" ? "prod" : "test";
 const config = env === 'prod' ? require('../conf/prod.json') : require('../conf/test.json');
@@ -54,14 +58,17 @@ Promise.all([db.getItems()]).then(data => {
     data[0].map((d) => {
         items[d.code] = d;
     });
-    console.log(items);
+    helper.log(Object.keys(items).length);
 });
+
+var whiteList = ["POSTRT"]; //, "POSTALARM", "POSTPOWER"];
+
 
 
 http.createServer((req, res)=>{
     return dealRequest(req, res);
 }).listen(port,()=>{
-    console.log('开启服务器')
+    helper.log('开启服务器')
 });
 
 
@@ -76,7 +83,7 @@ function isJSON(str) {
             }
 
         } catch(e) {
-            console.log('error：'+str+'!!!'+e);
+            helper.log('error：'+str+'!!!'+e);
             return false;
         }
     }
@@ -89,7 +96,7 @@ function fmtData(data) {
                 s = unescape(s.trim())
                 s = Buffer.from(s, 'base64').toString('utf8')
             } catch (e) {
-                console.log(e.message);
+                helper.log(e.message);
             }
             return s
         });
@@ -131,13 +138,14 @@ function dealRequest(req, res) {
                         }
 
                         if(data.content != "") {
-                            let content = fmtData(data.content); //Buffer.from(, 'base64').toString('ascii');
+                            let content = fmtData(data.content); //Buffer.from(data.content, 'base64').toString('ascii');
                             content = JSON.parse(content);
-                            
                             // 更新数据到db
                             if(data.cmd == "POSTRT") {
-                                let itemCode = data.distributbox.serverinfo;
-                                data.Breakers.map((d) => {
+                                //console.log(content);
+                                let itemCode = content.serverinfo.loginid;
+                                Object.keys(content.distributbox.Breakers).map((k) => {
+                                    let d = content.distributbox.Breakers[k];
                                     try {
                                         d.id = items[itemCode+"-"+d.addr].id;
                                         d.ind = d.power;
@@ -150,7 +158,9 @@ function dealRequest(req, res) {
                             }
                             content._cmd = data.cmd;
                             content._cmdName = cmdMap[data.cmd] || "未知";
-                            queue = [content].concat(queue);
+                            if(whiteList.indexOf(data.cmd) >= 0) {
+                                queue = [content].concat(queue);
+                            }
                         }
                     }
                 } catch(e) {

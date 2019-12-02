@@ -35,6 +35,8 @@ TcpServer.prototype._init_ = function() {
             socket.setKeepAlive(true, 300000);
 
             socket.on('data', function(data) {
+                console.log("================");
+                console.log(data.toString("hex"));
                 that.dealRes(socket, data);
             });
 
@@ -78,11 +80,16 @@ TcpServer.prototype.startCollect = function(socket) {
 }
 
 TcpServer.prototype.dealRes = function(socket, buff) {
+    helper.debug("in dealRes ");
+    if(buff) {
+        helper.debug(buff.toString('hex'));
+    }
     var that = this;
 
     // 已经正常启动， 有 buffer 数据
     if(socket.dataParser && buff) {
         socket.dataParser.feed(buff);
+        return ;
     }
 
     // 如果第一次启动
@@ -90,8 +97,10 @@ TcpServer.prototype.dealRes = function(socket, buff) {
     var items = this._maps.items.filter(function (it) {
         return it.collector_id == that.collectorId;
     });
+
     // 根据 items 生成 confs
     var confs = [];
+    var conf = CollectorConf[0];
     items.map(function (it) {
         var c = JSON.parse(JSON.stringify(conf));
         c.address = it.code;
@@ -123,6 +132,7 @@ TcpServer.prototype.dealRes = function(socket, buff) {
     });
     // 拿到需要发送的命令执行消息推送
     socket.dataParser.on("send", function(cmd) {
+        console.log("----------------", cmd);
         socket.write(cmd);
     });
 
@@ -138,7 +148,7 @@ TcpServer.prototype.dealRes = function(socket, buff) {
         socket.dataParser.clearAll();
         // 使用dataParser发送采集命令
         socket.dataParser.startCollector();
-    }, col.upload_cycle * 60 * 1000);
+    }, 1 * 60 * 1000);
 
     socket.inited = true;
 };

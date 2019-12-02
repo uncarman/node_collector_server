@@ -1,13 +1,13 @@
 {
     "colServ": {
         "interval": 300000,
-        "host": "0.0.0.0",
+        "host": "192.168.91.1",
         "port": "7000",
         "heartBeat": 30000
     },
     "mysql": {
         "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
-        "database": "lp_energy",
+        "database": "tmp_test",
         "username": "llproj",
         "password": "asjfy3j7Y@62o@hksowi"
     }

@@ -13,7 +13,7 @@ const Marked = {
     version: "v1",
     startVal: 0x53
 };
-const cmdTimeout = 20000;
+const cmdTimeout = 200000;
 
 function DataPaser(deviceId, config) {
     EventEmitter.call(this);
@@ -85,6 +85,7 @@ DataPaser.prototype._slice = function(length) {
 
 // 接受返回的信息, 并解析
 DataPaser.prototype.feed = function(data) {
+    console.log("----------------", data);
     if (!this.isWaitingNext) {
         this.buffer = Buffer.concat([this.buffer, data]);
         this.unpack();
@@ -380,11 +381,10 @@ DataPaser.prototype.nextCmd = function() {
             helper.debug("send cmd:", cmd);
             this.pack(cmd);
 
-            // 启动超时监听
-            that.nextCmd();
-            this.runCmdTimeOut = setTimeout(function() {
-                that.nextCmd();
-            }, that.cmdTimeout);
+            // // 启动超时监听
+            // this.runCmdTimeOut = setTimeout(function() {
+            //     that.nextCmd();
+            // }, that.cmdTimeout);
         }
     } else {
         helper.debug(
@@ -397,10 +397,9 @@ DataPaser.prototype.nextCmd = function() {
         this.pack(cmd);
 
         // 启动超时监听
-        that.nextCmd();
-        this.runCmdTimeOut = setTimeout(function() {
-            that.nextCmd();
-        }, that.cmdTimeout);
+        // this.runCmdTimeOut = setTimeout(function() {
+        //     that.nextCmd();
+        // }, that.cmdTimeout);
     }
 };
 

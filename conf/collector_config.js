@@ -77,27 +77,47 @@ function collectorConfig() {
         // },
         {
             "code": 5,    // 对应collector code
-            "module": "dlt645",     // 采集模式 modbus
+            "module": "modbus",     // 采集模式 modbus
             "cmdTimeout": 5000,
             "commands": [           // 命令以及解析
                 {
                     "options": {
-                        "name": "pa",
-                        "code": "00010000"
+                        "cmdType": "readHoldingRegisters",
+                        "startAddress": 8204,
+                        "regNum": 2
                     },
-                    "points":[
-                        {"id": "pa", "dotPosition": 2 }
+                    "points": [
+                        {
+                            "id": "pa",
+                            "offset": 0,
+                            "regNum": 2,
+                            "func": [
+                                [
+                                    "hex"
+                                ]
+                            ]
+                        }
                     ]
                 },
                 {
                     "options": {
-                        "name": "ra",
-                        "code": "00020000"
+                        "cmdType": "readHoldingRegisters",
+                        "startAddress": 1028,
+                        "regNum": 2
                     },
-                    "points":[
-                        {"id": "ind", "dotPosition": 2 }
+                    "points": [
+                        {
+                            "id": "ra",
+                            "offset": 0,
+                            "regNum": 2,
+                            "func": [
+                                [
+                                    "hex"
+                                ]
+                            ]
+                        }
                     ]
-                },
+                }
             ]
         },
     ];

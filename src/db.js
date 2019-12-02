@@ -87,7 +87,7 @@ DbServer.prototype.updateData = function(msg) {
             if (err) {
                 helper.log(err.message);
             }
-            helper.log(res);
+            //helper.log(res);
         });
     });
 };
