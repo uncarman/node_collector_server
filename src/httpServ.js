@@ -50,6 +50,7 @@ let cmdMap = {
     "POSTTEMPERATURE": "11. 上传温度统计数据",  // 提交设备的每小时或每天的最高温度数据
     "POSTLEAKAGE": "13. 上传漏电流统计数据",  // 设备的每小时或每天平均漏电流数据
 };
+var whiteList = ["POSTRT"]; //, "POSTALARM", "POSTPOWER"];
 
 let db = new Db(config.mysql);
 let items = {};
@@ -61,15 +62,13 @@ Promise.all([db.getItems()]).then(data => {
     helper.log(Object.keys(items).length);
 });
 
-var whiteList = ["POSTRT"]; //, "POSTALARM", "POSTPOWER"];
-
-
 
 http.createServer((req, res)=>{
     return dealRequest(req, res);
 }).listen(port,()=>{
     helper.log('开启服务器')
 });
+
 
 
 function isJSON(str) {

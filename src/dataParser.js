@@ -381,10 +381,10 @@ DataPaser.prototype.nextCmd = function() {
             helper.debug("send cmd:", cmd);
             this.pack(cmd);
 
-            // // 启动超时监听
-            // this.runCmdTimeOut = setTimeout(function() {
-            //     that.nextCmd();
-            // }, that.cmdTimeout);
+            // 启动超时监听
+            this.runCmdTimeOut = setTimeout(function() {
+                that.nextCmd();
+            }, that.cmdTimeout);
         }
     } else {
         helper.debug(
@@ -397,9 +397,9 @@ DataPaser.prototype.nextCmd = function() {
         this.pack(cmd);
 
         // 启动超时监听
-        // this.runCmdTimeOut = setTimeout(function() {
-        //     that.nextCmd();
-        // }, that.cmdTimeout);
+        this.runCmdTimeOut = setTimeout(function() {
+            that.nextCmd();
+        }, that.cmdTimeout);
     }
 };
 

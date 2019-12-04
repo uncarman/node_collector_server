@@ -35,8 +35,6 @@ TcpServer.prototype._init_ = function() {
             socket.setKeepAlive(true, 300000);
 
             socket.on('data', function(data) {
-                console.log("================");
-                console.log(data.toString("hex"));
                 that.dealRes(socket, data);
             });
 
@@ -80,16 +78,13 @@ TcpServer.prototype.startCollect = function(socket) {
 }
 
 TcpServer.prototype.dealRes = function(socket, buff) {
-    helper.debug("in dealRes ");
-    if(buff) {
-        helper.debug(buff.toString('hex'));
-    }
+    var conf = CollectorConf;
     var that = this;
 
     // 已经正常启动， 有 buffer 数据
     if(socket.dataParser && buff) {
         socket.dataParser.feed(buff);
-        return ;
+        return;
     }
 
     // 如果第一次启动
