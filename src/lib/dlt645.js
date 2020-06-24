@@ -107,7 +107,9 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
         if (checksum == calculateChecksum[0]) {
             var pointConf = command.points;
             var tag = dataBuffer[8];
-            var payloadBuffer = dataBuffer.slice(14, 18);   
+            var dataLen = dataBuffer[9];
+            var start = dataBuffer.indexOf(head);
+            var payloadBuffer = dataBuffer.slice(start+10, start+10+dataLen);   
             // 返回错误, 电表命令不支持
             if (tag == FunctionCode.error) {
                 helper.debug("#" + command.options.name + " code: " + command.options.code + " not support");

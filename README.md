@@ -53,3 +53,35 @@ npm install -g cnpm --registry=https://registry.npm.taobao.org
 ```
 npm install --global --production windows-build-tools
 ```
+
+
+
+
+#### 5. 使用注意
+注意: 
+1. 采集时 a_item.code 即为 设备addr
+2. conf/collector_config.js 需要配置一个id为[ind]的点信息, 对应a_item_data.indication字段
+
+
+启动命令: (其中0对应conf/collector_config.js的第几个配置)
+node src/index.js 0
+
+当前为server模式, 运行后监听host:post(conf/collector_config.js中对应配置)等待client连接 
+test/tm.js 为模拟的client
+
+采集器配置: conf/collector_config.js, 拿到对应的多个采集器的详细模型, 注: 目前只支持由第一个生成设备点表
+collectorId -> Db.a_collector.id
+module -> 采集模式: modbus / dlt645
+commands -> 对应点表配置
+
+运行时:
+1. 读取db.a_collector, 获取所有采集器列表
+2. 读取 db.a_item, 获取所有需要采集的设备
+3. 读取 conf/collector_config.js 中第一个配置模型, 生成采集器点表
+4. 执行采集命令
+5. 返回数据到 appServer.js 的 data 事件
+
+
+#### 6. 测试脚本
+test/testTcpServer.js
+test/tm.js

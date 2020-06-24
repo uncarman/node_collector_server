@@ -8,7 +8,7 @@ const Db = require("./db.js");
 const helper = require("./helper.js");
 
 const env = process.argv[2] === "prod" ? "prod" : "test";
-const config = env === 'prod' ? require('../conf/prod.json') : require('../conf/test.json');
+const config = require('../conf/conf.json');
 
 var port = 8080;
 var queue = [];

@@ -1,10 +1,4 @@
 {
-    "colServ": {
-        "interval": 300000,
-        "host": "192.168.91.1",
-        "port": "7000",
-        "heartBeat": 30000
-    },
     "mysql": {
         "host": "rm-uf67xbt5r3r17jddto.mysql.rds.aliyuncs.com",
         "database": "tmp_test",

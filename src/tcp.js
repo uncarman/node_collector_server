@@ -6,12 +6,11 @@ const net = require('net');
 
 const helper = require('./helper.js');
 const DataParser = require("./dataParser.js");
-const CollectorConf = require("../conf/collector_config.js").collectorConfig();
+const Db = require("./db.js");
 
-
+// options 指 conf/collector_config.js 中当前(ind对应)点表的模板
 function TcpServer(options) {
     this.options = options;
-    this.collectorId = 1;
     this.sockets = {};
     this.server = null;
     this.started = false;
@@ -29,7 +28,7 @@ TcpServer.prototype._init_ = function() {
             that.sockets[connection] = socket;
             socket.inited = false;
             socket.connection = connection;
-            socket.sn = that.collectorId; // 只有一个采集器
+            socket.sn = that.options.collectorId; // 采集器标识
             socket.dataParsers = {};
 
             socket.setKeepAlive(true, 300000);
@@ -78,7 +77,6 @@ TcpServer.prototype.startCollect = function(socket) {
 }
 
 TcpServer.prototype.dealRes = function(socket, buff) {
-    var conf = CollectorConf;
     var that = this;
 
     // 已经正常启动， 有 buffer 数据
@@ -88,14 +86,10 @@ TcpServer.prototype.dealRes = function(socket, buff) {
     }
 
     // 如果第一次启动
-    // 拿到对应的设备列表器
-    var items = this._maps.items.filter(function (it) {
-        return it.collector_id == that.collectorId;
-    });
-
+    var items = this._maps.items;
     // 根据 items 生成 confs
     var confs = [];
-    var conf = CollectorConf[0];
+    var conf = helper.deepCopy(this.options);
     items.map(function (it) {
         var c = JSON.parse(JSON.stringify(conf));
         c.address = it.code;
@@ -118,6 +112,8 @@ TcpServer.prototype.dealRes = function(socket, buff) {
             msg.id = itemMap[msg.addr].id;
             //delete msg.addr;
             that.emit("data", msg);
+            // 检查是否需要报警
+            that.checkWarning(msg, itemMap[msg.addr]);
         }
     });
     // 当拿到采集器下单个的设备采集结束
@@ -127,7 +123,6 @@ TcpServer.prototype.dealRes = function(socket, buff) {
     });
     // 拿到需要发送的命令执行消息推送
     socket.dataParser.on("send", function(cmd) {
-        console.log("----------------", cmd);
         socket.write(cmd);
     });
 
@@ -147,5 +142,74 @@ TcpServer.prototype.dealRes = function(socket, buff) {
 
     socket.inited = true;
 };
+
+// 测试报警数据
+// {"pp":"55.73","uid":"5","pa":"205.85","a":"28.24","pf":"55.67","v":220,"pg":"60.21","pj":"57.34","rm":"100.00",
+// "ind": "累计指标", "addr":"3","电压":"242","电流":"12"}
+// [
+//     {
+//         "description": "电压过高",
+//         "key": "电压",
+//         "val": "240",
+//         "compare": ">=",
+//         "warning_category" : "电过压",
+//         "severity": "严重",
+//         "err_msg": "电压过高, 请检查",
+//         "solution_ref": "切断电路",
+//     },
+//     {
+//         "description": "电流过大",
+//         "key": "电流",
+//         "val": "10",
+//         "compare": ">=",
+//         "warning_category" : "电负载超标",
+//         "severity": "严重",
+//         "err_msg": "电流过高",
+//         "solution_ref": "检查是否漏电, 或开启大功率设备",
+//     }
+// ]
+TcpServer.prototype.checkWarning = function(msg, item) {
+    try {
+        var that = this;
+        var rules = item.rules;
+        var itemId = item.id;
+        if(typeof rules == "string") {
+            rules = JSON.parse(rules);
+        }
+        // 遍历rule, 检查是否需要报警
+        rules.map(function(rule) {
+            var key = rule.key;
+            var val = rule.val;
+            var compare = rule.compare;
+            if(msg.hasOwnProperty(key)) {
+                var compareStr = msg[key]+compare+val;
+                var compareArr = [msg[key],compare,val];
+                if(eval(compareStr)) {
+                    // 尝试报警
+                    that.emit("warning", {
+                        item_id: itemId,
+                        compare: compareArr,
+                        warning_category: rule.warning_category,
+                        severity: rule.severity,
+                        err_msg: rule.err_msg,
+                        solution_ref: rule.solution_ref,
+                        reported_at: new Date(),
+                    });
+                } else {
+                    // 尝试修复
+                    that.emit("warning", {
+                        item_id: itemId,
+                        warning_category: rule.warning_category,
+                        has_fixed: 1,
+                        reported_at: new Date(),
+                    });
+                }
+            }
+        });
+    } catch(e) {
+        console.trace(e);
+    }
+}
+
 
 module.exports = TcpServer;

@@ -340,13 +340,11 @@ DataPaser.prototype.nextCmd = function() {
     this.cmdInd += 1;
     // 当前地址的采集已经结束
     // 发送缓存的数据
-    helper.debug(this.cmdInd, this.addrInd);
-    helper.debug(this.cmds[this.addrs[this.addrInd]].length, this.addrs.length);
     helper.debug(
-        this.cmdInd,
-        this.addrInd,
-        this.cmds[this.addrs[this.addrInd]].length,
-        this.addrs.length
+        "cmdInd", this.cmdInd,
+        "addrInd", this.addrInd,
+        "cmds.length", this.cmds[this.addrs[this.addrInd]].length,
+        "addrs.length", this.addrs.length
     );
     if (this.cmdInd >= this.cmds[this.addrs[this.addrInd]].length) {
         helper.debug(

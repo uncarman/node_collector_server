@@ -15,8 +15,8 @@ function log() {
 }
 
 function debug() {
-    if(isDebug) {
-        log(arguments);
+    if(global.isDebug) {
+        log.apply(log, arguments);
     }
 }
 

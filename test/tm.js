@@ -34,6 +34,8 @@ tcp_client.on('data',function(data){
 		var ret = null;
 		console.log("recv", bufStr);
 		switch (bufBody) {
+			case '0000000ac5fe':
+			case '0000000ac42f':
 			case '000000104406':
 				ret = Buffer.from(bufTag + "00010000002301032000090001000200030004000500060007000800090116000B000C000D000E000F", 'hex');
 				break;
@@ -51,6 +53,9 @@ tcp_client.on('data',function(data){
 				break;
 			case 'fefe6802000000000068110433333533b516':
 				ret = Buffer.from("fefefefe6802000000000068910833373533453333338916", 'hex');
+				break;
+			case 'fefe68847122610102681104333334332d16':
+				ret = Buffer.from(bufTag + "fefe6884712261010268910833363533333333337616", 'hex');
 				break;
 			default:
 				ret = Buffer.from("", 'hex');
