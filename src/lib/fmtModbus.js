@@ -1,7 +1,7 @@
 'use strict';
 
 // helper
-const helper = require('../helper.js');
+const helper = require('../helper');
 
 
 /*缩写与实际意义对应关系

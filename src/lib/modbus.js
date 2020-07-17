@@ -1,9 +1,9 @@
 'use strict';
 
 // helper
-const helper = require('../helper.js');
-const crc16 = require('./_crc16.js');
-const decUtil = require('./_decUtil.js');
+const helper = require('../helper');
+const crc16 = require('./_crc16');
+const decUtil = require('./_decUtil');
 
 // 暂时设定一个寄存器长度为常数：一个寄存器为16bit即2byte
 const regLen = 2;
@@ -78,6 +78,7 @@ Modbus.prototype._parseResponseBuffer = function (buffer, ind) {
             return this._parseResponseBuffer(buffer.slice(1), ind);
         }
     } catch (e) {
+        console.trace(e);
         // 数据不匹配，可能包含发送命令，去掉第一个字节，尝试重新截取
         return this._parseResponseBuffer(buffer.slice(1), ind);
     }
@@ -91,13 +92,16 @@ Modbus.prototype.packCmds = function (address) {
         let genCmd = this._genReadBuffer(address, FunctionCode[options.cmdType], options.startAddress, options.regNum);
         ret.push(genCmd);
     }
+    console.log(ret);
     return ret;
 };
 
 Modbus.prototype.parsePoint = function (buf, ind) {
-    let dataBuffer = this._parseResponseBuffer(buf, ind);
-    helper.debug("parsePoint dataBuffer", dataBuffer);
+    // 直接改成直接用modbus-serial模块的方式, buf不包含头信息
+    let dataBuffer = buf; //this._parseResponseBuffer(buf, ind);
+    //parsePoint dataBuffer {"type":"Buffer","data":[0,0,3,191,63,1]}
     let command = this.config.commands[ind];
+    helper.debug("parsePoint dataBuffer", dataBuffer, command);
     // 将Buffer通过点集映射为对象
     let parsedObj = {};
     if(dataBuffer && dataBuffer.length > 0) {
@@ -114,3 +118,4 @@ Modbus.prototype.parsePoint = function (buf, ind) {
 };
 
 module.exports = Modbus;
+

@@ -1,7 +1,7 @@
 'use strict';
 
-const fmtDlt645 = require('./fmtDlt645.js');
-const fmtModbus = require('./fmtModbus.js');
+const fmtDlt645 = require('./fmtDlt645');
+const fmtModbus = require('./fmtModbus');
 
 function formatData(msg, conf) {
     var module = conf["module"] || false;

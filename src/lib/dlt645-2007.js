@@ -26,23 +26,25 @@ function Dlt645(config) {
 Dlt645.prototype._genReadBuffer = function (address, code) {
     //basic part
     var addr = string2BCD(address, 0x06);
-
     //flag
-    var flag = string2BCD(code, 0x04);
+    //var flag = string2BCD(code, 0x04);
+    var flag = Buffer.from(code, "hex");
     var len = flag.length;
     var lenBuffer = Buffer.from([len]);
+    
+    // 2007 不需要+33
     for (var i = 0; i < len; i++){
-        flag[i] = flag[i] + 0x33;
+        //flag[i] = flag[i] + 0x33;
     }
 
     //temp frame not include checksum and tail
-    var frame = Buffer.concat([FunctionCode["headBuffer"], addr, FunctionCode["headBuffer"], FunctionCode["controlBuffer"], lenBuffer, flag]);
+    var frame = Buffer.concat([FunctionCode["headBuffer"], addr, FunctionCode["headBuffer"], flag]);
 
     //checksum
     var checksum = BytesChecksum(frame);
 
     // 电表通信头部需要添加FE FE FE
-    var dlt645Head = Buffer.from('fefefefe', 'hex');
+    var dlt645Head = Buffer.from('fefefe', 'hex');
     // generate the frame
     return Buffer.concat([dlt645Head, frame, checksum, FunctionCode["tailBuffer"]]);
 };
@@ -52,6 +54,7 @@ Dlt645.prototype._genReadBuffer = function (address, code) {
 Dlt645.prototype._parseResponseBuffer = function (buffer) {
     // 拿到数据头
     let startPos = 0;
+    let endPos = buffer.length - 1;
     let recvStart = false;
     for (var i = 0; i < buffer.length; i++) {
         if (buffer[i] === FunctionCode.head) {
@@ -60,13 +63,20 @@ Dlt645.prototype._parseResponseBuffer = function (buffer) {
             break;
         }
     }
+    // 找到尾部 fe
+    for (var i = buffer.length; i > 0; i--) {
+        if (buffer[i] === 0xfe) {
+            endPos = i;
+            break;
+        }
+    }
     if(recvStart) {
-        var tempBuffer = buffer.slice(startPos);
+        var tempBuffer = buffer.slice(startPos, endPos);
         var len = tempBuffer.length;
         if (len >= 10) {
             var dataLen = tempBuffer[9];
             // 拿到完整的数据buffer
-            helper.debug(len, (dataLen + 12), tempBuffer[len - 1]);
+            console.log(len, (dataLen + 12), tempBuffer[len - 1]);
             if (len == (dataLen + 12) && tempBuffer[len - 1] == FunctionCode.tail) {
                 return tempBuffer;
             } else {
@@ -94,10 +104,8 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
     let dataBuffer = this._parseResponseBuffer(buf); 
     let command = this.config.commands[ind];
     // 将Buffer通过点集映射为对象
-    let parsedObj = {
-        "addr": this.addr
-    };
-    if(dataBuffer && command) {
+    let parsedObj = {};
+    if(dataBuffer) {
         let len = dataBuffer.length;
         let checksum = dataBuffer[len - 2];
         let remain = dataBuffer.slice(0, len - 2);
@@ -109,10 +117,12 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
         if (checksum == calculateChecksum[0]) {
             var pointConf = command.points;
             var tag = dataBuffer[8];
-            var payloadBuffer = dataBuffer.slice(14, 18);   
+            var dataLen = dataBuffer[9];
+            var start = dataBuffer.indexOf(head);
+            var payloadBuffer = dataBuffer.slice(start+10, start+10+dataLen);   
             // 返回错误, 电表命令不支持
             if (tag == FunctionCode.error) {
-                helper.log("#" + command.options.name + " code: " + command.options.code + " not support");
+                helper.debug("#" + command.options.name + " code: " + command.options.code + " not support");
                 parsedObj[pointConf.id] = "0.00";
             }
             else {
@@ -124,11 +134,9 @@ Dlt645.prototype.parsePoint = function (buf, ind) {
                 let pointOffset = pointConf[0].dotPosition;
                 let payloadStr = BCD2String(payloadBuffer);
                 let payloadLen = payloadStr.length; 
-                helper.debug("#", pointConf, pointConf[0].id, payloadStr.substr(0, payloadLen - pointOffset), payloadStr.substr(payloadLen - pointOffset));
+                //helper.log("#", pointConf, pointConf[0].id, payloadStr.substr(0, payloadLen - pointOffset), payloadStr.substr(payloadLen - pointOffset));
                 parsedObj[pointConf[0].id] = (payloadStr.substr(0, payloadLen - pointOffset) | "0") + "." + payloadStr.substr(payloadLen - pointOffset);
             }
-        } else {
-            throw Error("parsePoint failed");
         }
     }
     return parsedObj;

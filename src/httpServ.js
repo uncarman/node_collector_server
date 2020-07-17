@@ -4,11 +4,11 @@
 let http = require('http');
 let url = require('url');
 let querystring = require('querystring');
-const Db = require("./db.js");
-const helper = require("./helper.js");
+const Db = require("./mydb");
+const helper = require("./helper");
 
 const env = process.argv[2] === "prod" ? "prod" : "test";
-const config = require('../conf/conf.json');
+const config = require('./conf/sysConfig').sysConfig();
 
 var port = 8080;
 var queue = [];

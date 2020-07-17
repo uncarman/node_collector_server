@@ -4,7 +4,7 @@ const util = require("util");
 const EventEmitter = require("events");
 const mysql = require("mysql");
 
-const helper = require("./helper.js");
+const helper = require("./helper");
 
 function DbServer(options) {
     EventEmitter.call(this);

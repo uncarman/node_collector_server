@@ -3,9 +3,9 @@
 var net = require('net');
 
 
-const TcpServ = require("../src/tcp.js");
-const helper = require("../src/helper.js");
-const Db = require("../src/db.js");
+const TcpServ = require("../src/tcp");
+const helper = require("../src/helper");
+const Db = require("../src/mydb");
 
 global.isDebug = false;
 

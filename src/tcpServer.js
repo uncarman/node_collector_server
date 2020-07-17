@@ -1,12 +1,14 @@
 'use strict';
 
+const bytenode = require('bytenode');
+
 const util = require('util');
 const EventEmitter = require('events');
 const net = require('net');
 
-const helper = require('./helper.js');
-const DataParser = require("./dataParser.js");
-const Db = require("./db.js");
+const helper = require('./helper');
+const DataParser = require("./dataParser");
+const Db = require("./mydb");
 
 // options 指 conf/collector_config.js 中当前(ind对应)点表的模板
 function TcpServer(options) {
@@ -123,6 +125,7 @@ TcpServer.prototype.dealRes = function(socket, buff) {
     });
     // 拿到需要发送的命令执行消息推送
     socket.dataParser.on("send", function(cmd) {
+        helper.debug("send cmd", cmd);
         socket.write(cmd);
     });
 
@@ -183,7 +186,7 @@ TcpServer.prototype.checkWarning = function(msg, item) {
             var compare = rule.compare;
             if(msg.hasOwnProperty(key)) {
                 var compareStr = msg[key]+compare+val;
-                var compareArr = [msg[key],compare,val];
+                var compareArr = JSON.stringify([msg[key],compare,val]);
                 if(eval(compareStr)) {
                     // 尝试报警
                     that.emit("warning", {

@@ -5,16 +5,28 @@
   "main": "index.js",
   "dependencies": {
     "bytenode": "^1.1.6",
-    "mysql": "^2.17.1"
+    "modbus-serial": "^8.0.0",
+    "mysql": "^2.17.1",
+    "xml2js": "^0.4.23"
   },
   "scripts": {
-    "start0": "forever start -l D:/works/projects/node_collector_server/logs/prod.txt -a src/index.js 0",
-    "start1": "forever start -l D:/works/projects/node_collector_server/logs/prod.txt -a src/index.js 1",
-    "mds": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a test/httpServ.js"
+    "start0": "forever start -l D:/logs/prod.txt -a dist/index.js 0",
+    "start1": "forever start -l D:/logs/prod.txt -a dist/index.js 1",
+    "mds": "forever start -l D:/works/projects/node_collector_server/logs/test.txt -a test/httpServ.js",
+    "nodec": "nodec build.js --skip-npm-install",
+    "build": "node build.js",
+    
+    "c1": "forever start -l e:/logs/c1.txt -a dist/index.js 0 client",
+    "c2": "forever start -l e:/logs/c2.txt -a dist/index.bak.js 1 client",
+    "c3": "forever start -l e:/logs/c3.txt -a dist/index.js 2 client",
+    "c4": "forever start -l e:/logs/c4.txt -a dist/index.bak.js 3 client"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/uncarman/node_collector_server.git"
   },
-  "author": "sam"
+  "author": "sam",
+  "devDependencies": {
+    "javascript-obfuscator": "^1.1.1"
+  }
 }

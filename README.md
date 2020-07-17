@@ -85,3 +85,24 @@ commands -> 对应点表配置
 #### 6. 测试脚本
 test/testTcpServer.js
 test/tm.js
+
+
+#### 7. 代码保护
+1. 安装混淆工具 javascript-obfuscator
+    npm install -D javascript-obfuscator
+2. 安装编码工具 bytenode
+    npm install -D bytenode
+3. 编写编译脚本 build.js
+4. 发布时执行命令 
+	node build.js cp    -> 复制src代码到 dist, 并进行混淆
+5. 启动命令: 参考package中 c1~c4
+	node dist/index.js 0 client
+	说明: 载入 conf/collectorConfig.js中ind为0的配置, 载入tcpClient.js逻辑运行采集
+
+	node dist/index.bak.js 1 client
+	说明: 载入 conf/collectorConfig.js中ind为1的配置, 载入tcpClient.bak.js逻辑运行采集
+
+	node dist/index.js 2 server
+	说明: 载入 conf/collectorConfig.js中ind为2的配置, 载入tcpServer.js逻辑运行采集
+
+

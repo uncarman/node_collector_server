@@ -9,7 +9,7 @@ const config = require('./conf/sysConfig').sysConfig();
 
 var TcpServ = require("./tcpServer");
 if(collectType == "client") {
-    TcpServ = require("./tcpClient");
+    TcpServ = require("./tcpClient.bak");
 }
 
 const AppServer = require('./appServer');

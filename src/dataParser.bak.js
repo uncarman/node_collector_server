@@ -88,12 +88,17 @@ DataPaser.prototype._slice = function(length) {
 // 接受返回的信息, 并解析
 DataPaser.prototype.feed = function(data) {
     helper.debug("feed ----------------", data);
-    //if (!this.isWaitingNext) {
-    this.buffer = Buffer.concat([this.buffer, data]);
-    this.unpack();
-    //} else {
-        // pass 忽略收到的数据
-    //}
+    if(this.buffer.length > 15 && data.slice(data.length-1, data.length).toString("hex") == "fe") {
+        //if (!this.isWaitingNext) {
+        this.buffer = Buffer.concat([this.buffer, data]);
+        this.unpack();
+        //} else {
+            // pass 忽略收到的数据
+        //}
+    } else {
+        this.buffer = Buffer.concat([this.buffer, data]);
+        helper.debug("feed and waiting ----------------");
+    }
 };
 
 ///////////////// 基于通信协议 /////////////////
@@ -111,10 +116,8 @@ DataPaser.prototype.unpack = function() {
         this.decodeData(this.buffer);
         this._slice(this.buffer.length);
         helper.debug("unpack success, do next");
-        that.data.addr = this.addrs[this.addrInd];
-        that.emit("data", that.data);
         // 解析完成后, 执行下一条命令
-        //this.nextCmd();
+        this.nextCmd();
     } catch (e) {
         console.trace(e);
         // 忽略当前设备后续内容，等待一个时间间隔，准备下个设备的采集
@@ -126,7 +129,7 @@ DataPaser.prototype.unpack = function() {
             that.cmdInd,
             that.addrs[that.addrInd]
         );
-        /*
+
         // 等待一次间隔后
         // 检查是否已经终止采集
         if (!this.collectingFlag) {
@@ -150,7 +153,7 @@ DataPaser.prototype.unpack = function() {
             helper.log("----- in timeout 0");
             that.nextCmd();
         }, that.cmdTimeout);
-        */
+
     }
 };
 
@@ -348,7 +351,7 @@ DataPaser.prototype.nextCmd = function() {
     helper.debug(
         "cmdInd", this.cmdInd,
         "addrInd", this.addrInd,
-        "cmds.length", this.cmds[this.addrs[this.addrInd]].length,
+        "cmdInd.ind", this.cmds[this.addrs[this.addrInd]].length,
         "addrs.length", this.addrs.length
     );
     if (this.cmdInd >= this.cmds[this.addrs[this.addrInd]].length) {
@@ -363,6 +366,8 @@ DataPaser.prototype.nextCmd = function() {
         //that.emit("data", formatData(that.data, this.devicePasers[this.addrs[this.addrInd]]["config"]));
         // 启动下一个地址的采集
         this.addrInd += 1;
+        // 清空buffer
+        this.buffer = Buffer.alloc(0);
         helper.debug(
             "开始采集下一个地址",
             this.addrInd,
